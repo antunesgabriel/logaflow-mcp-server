@@ -5,14 +5,15 @@ import dotenv from "dotenv";
 import axios, { AxiosRequestConfig } from "axios";
 
 // Configuration
-const LOGAFLOW_API_URL = "http://localhost:4200/v1";
-
 dotenv.config();
 
 const API_KEY = process.env.LOGAFLOW_API_KEY;
 if (!API_KEY) {
   throw new Error("LOGAFLOW_API_KEY environment variable is required");
 }
+
+const LOGAFLOW_API_URL =
+  process.env.LOGAFLOW_API_URL ?? "https://api.logaflow.com/v1";
 
 // --- Resource Definitions ---
 const projectSchema = z.object({
@@ -115,7 +116,7 @@ server.tool(
 
       const response = await axios.get(
         `${LOGAFLOW_API_URL}/projects/${args.project_id}/feedbacks`,
-        config
+        config,
       );
       const parsedData = feedbacksSchema.parse(response.data.data.feedbacks);
       return {
@@ -137,7 +138,7 @@ server.tool(
         isError: true,
       };
     }
-  }
+  },
 );
 
 server.tool(
@@ -160,7 +161,7 @@ server.tool(
       const response = await axios.post(
         `${LOGAFLOW_API_URL}/feedbacks/${args.feedback_id}/reply`,
         data,
-        config
+        config,
       );
       const parsedData = z.string().parse(response.data.data);
       return { content: [{ type: "text", text: parsedData }] };
@@ -168,7 +169,7 @@ server.tool(
       console.error("Error calling Logaflow API:", error);
       throw new Error(`Error replying to feedback: ${error.message}`);
     }
-  }
+  },
 );
 
 // --- Prompts ---
@@ -185,7 +186,7 @@ server.prompt(
         },
       },
     ],
-  })
+  }),
 );
 
 server.prompt(
@@ -205,7 +206,7 @@ server.prompt(
         },
       },
     ],
-  })
+  }),
 );
 
 server.prompt(
@@ -225,7 +226,7 @@ server.prompt(
         },
       },
     ],
-  })
+  }),
 );
 
 const transport = new StdioServerTransport();
