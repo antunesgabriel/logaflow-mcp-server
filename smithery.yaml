@@ -1,0 +1,201 @@
+name: Logaflow MCP Server
+version: 1.0.0
+description: MCP server for interacting with Logaflow API to manage projects and feedbacks
+
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties:
+      apiKey:
+        type: string
+        description: Logaflow API key for authentication
+      apiUrl:
+        type: string
+        description: Optional custom Logaflow API URL
+        default: https://api.logaflow.com/v1
+    required:
+      - apiKey
+  commandFunction: |-
+    (config) => ({
+      "command": "node",
+      "args": [
+        "dist/index.js"
+      ],
+      "env": {
+        "LOGAFLOW_API_KEY": config.apiKey,
+        "LOGAFLOW_API_URL": config.apiUrl
+      }
+    })
+
+tools:
+  list_user_projects:
+    description: Lists all projects accessible to the user
+    inputSchema:
+      type: object
+      properties: {}
+      additionalProperties: false
+    outputSchema:
+      type: array
+      items:
+        type: object
+        properties:
+          projectId:
+            type: string
+            description: Unique identifier of the project
+          projectName:
+            type: string
+            description: Name of the project
+          userRole:
+            type: string
+            description: Role of the user in the project
+        required:
+          - projectId
+          - projectName
+          - userRole
+
+  list_project_feedbacks:
+    description: Lists all feedbacks for a specific project
+    inputSchema:
+      type: object
+      properties:
+        project_id:
+          type: string
+          description: The ID of the project to retrieve feedbacks from
+      required:
+        - project_id
+      additionalProperties: false
+    outputSchema:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+            description: Unique identifier of the feedback
+          url:
+            type: string
+            nullable: true
+            description: URL associated with the feedback
+          type:
+            type: string
+            description: Type of feedback
+          title:
+            type: string
+            description: Title of the feedback
+          author:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Unique identifier of the feedback author
+              name:
+                type: string
+                description: Name of the feedback author
+              email:
+                type: string
+                description: Email of the feedback author
+              avatar:
+                type: string
+                description: URL of the feedback author's avatar
+              customFields:
+                type: object
+                nullable: true
+                description: Custom fields associated with the author
+            required:
+              - id
+              - name
+              - email
+              - avatar
+              - customFields
+          comment:
+            type: string
+            description: Text of the feedback
+          assetKey:
+            type: string
+            nullable: true
+            description: Asset key associated with the feedback
+          isPrivate:
+            type: boolean
+            description: Indicates if the feedback is private
+          projectId:
+            type: string
+            description: ID of the project the feedback belongs to
+          sessionKey:
+            type: string
+            description: Session key associated with the feedback
+          createdAt:
+            type: string
+            format: date-time
+            description: Timestamp when the feedback was created
+          updatedAt:
+            type: string
+            format: date-time
+            nullable: true
+            description: Timestamp when the feedback was last updated
+        required:
+          - id
+          - type
+          - title
+          - author
+          - comment
+          - isPrivate
+          - projectId
+          - sessionKey
+          - createdAt
+
+  reply_to_feedback:
+    description: Replies to a specific feedback
+    inputSchema:
+      type: object
+      properties:
+        feedback_id:
+          type: string
+          description: The ID of the feedback to reply to
+        response:
+          type: string
+          description: The text of the reply
+      required:
+        - feedback_id
+        - response
+      additionalProperties: false
+    outputSchema:
+      type: string
+      description: Confirmation message
+
+prompts:
+  analyze_feedback_trends:
+    description: Analyzes feedback trends for a specific project
+    inputSchema:
+      type: object
+      properties:
+        project_id:
+          type: string
+          description: The ID of the project to analyze
+      required:
+        - project_id
+      additionalProperties: false
+
+  identify_urgent_bugs:
+    description: Identifies urgent bug reports in a specific project
+    inputSchema:
+      type: object
+      properties:
+        project_id:
+          type: string
+          description: The ID of the project to check for urgent bugs
+      required:
+        - project_id
+      additionalProperties: false
+
+  summarize_feedback:
+    description: Summarizes feedback for a specific project
+    inputSchema:
+      type: object
+      properties:
+        project_id:
+          type: string
+          description: The ID of the project to summarize feedback for
+      required:
+        - project_id
+      additionalProperties: false
